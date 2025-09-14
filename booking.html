@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book With Generali</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Your CSS files -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="booking.css">
+</head>
+
+<body>
+
+    
+
+    <!-- Debug Info Panel -->
+    <div class="debug-info" id="debugInfo"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-text">Generali Global</div>
+        </a>
+        <div class="nav-links">
+            <a href="index.html#home"><i class="fas fa-home"></i> Home</a>
+            <a href="index.html#about"><i class="fas fa-user"></i> About</a>
+            <a href="index.html#services"><i class="fas fa-cogs"></i> Services</a>
+            <a href="index.html#events"><i class="fas fa-calendar-alt"></i> Events</a>
+            <a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a>
+            <a href="/booking.html" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
+        </div>
+        <button class="hamburger" id="hamburger">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <a href="index.html" class="logo">
+                <div class="logo-text">Generali Global</div>
+            </a>
+            <button class="close-btn" id="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-links">
+            <a href="index.html#home"><i class="fas fa-home"></i> Home</a>
+            <a href="index.html#about"><i class="fas fa-user"></i> About</a>
+            <a href="index.html#services"><i class="fas fa-cogs"></i> Services</a>
+            <a href="index.html#events"><i class="fas fa-calendar-alt"></i> Events</a>
+            <a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a>
+            <a href="booking.html" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
+        </div>
+    </div>
+    
+    <!-- Quote Hero Section -->
+    <section class="quote-hero">
+        <div class="quote-hero-content">
+            <h1>Request a Quote</h1>
+            <p>Get a customized quote for your event with Generali Global</p>
+        </div>
+    </section>
+    
+    <!-- Quote Form -->
+    <section class="quote-form-container">
+        <div class="quote-form" id="quote-form">
+            <div class="form-header">
+                <h2>Request for Quotation</h2>
+                <p>Provide some details about your event and we'll send you a customized quote via WhatsApp</p>
+            </div>
+    
+            <form id="quoteForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quoteFirstName">First Name *</label>
+                        <input type="text" id="quoteFirstName" name="quoteFirstName" required>
+                        <div class="validation-error" id="quoteFirstNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quoteLastName">Last Name *</label>
+                        <input type="text" id="quoteLastName" name="quoteLastName" required>
+                        <div class="validation-error" id="quoteLastNameError"></div>
+                    </div>
+                </div>
+    
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quoteEmail">Email *</label>
+                        <input type="email" id="quoteEmail" name="quoteEmail" required>
+                        <div class="validation-error" id="quoteEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quotePhone">Phone *</label>
+                        <input type="tel" id="quotePhone" name="quotePhone" required
+                            placeholder="e.g., 0712345678 or 254712345678">
+                        <div class="validation-error" id="quotePhoneError"></div>
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <label for="quoteEventType">Event Type *</label>
+                    <select id="quoteEventType" name="quoteEventType" required>
+                        <option value="">Select Event Type</option>
+                        <option value="Corporate Events">Corporate Events</option>
+                        <option value="Wedding Events">Wedding Events</option>
+                        <option value="Graduation Parties">Graduation Parties</option>
+                        <option value="Company Parties & Fun Days">Company Parties & Fun Days</option>
+                        <option value="Birthday Parties">Birthday Parties</option>
+                        <option value="School Events">School Events</option>
+                    </select>
+                    <div class="validation-error" id="quoteEventTypeError"></div>
+                </div>
+    
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quoteEventDuration">Event Duration *</label>
+                        <select id="quoteEventDuration" name="quoteEventDuration" required>
+                            <option value="">Select Duration</option>
+                            <option value="1 hour">1 hour</option>
+                            <option value="2 hours">2 hours</option>
+                            <option value="3 hours">3 hours</option>
+                            <option value="Half day (4 hours)">Half day (4 hours)</option>
+                            <option value="Full day (8 hours)">Full day (8 hours)</option>
+                        </select>
+                        <div class="validation-error" id="quoteEventDurationError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quoteNumberOfSessions">Number of Sessions</label>
+                        <select id="quoteNumberOfSessions" name="quoteNumberOfSessions">
+                            <option value="1">1 session</option>
+                            <option value="2">2 sessions</option>
+                            <option value="3">3 sessions</option>
+                            <option value="4+">4+ sessions</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <label for="eventDetails">Additional Details (Optional)</label>
+                    <textarea id="eventDetails" name="eventDetails"
+                        placeholder="Any other information about your event that might be helpful for our quotation"></textarea>
+                    <div class="optional-note">This field is optional</div>
+                </div>
+    
+                <button type="submit" class="submit-btn" id="quoteSubmitBtn">Request Quote via WhatsApp</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Success Message -->
+    <div class="quote-form-container" id="success-message-container" style="display: none;">
+        <div class="quote-form">
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <h3>Thank You!</h3>
+                <p id="success-message-text">Your quote request has been prepared. You will be redirected to WhatsApp in a
+                    moment to send your request and receive your customized quote.</p>
+                <div class="countdown" id="countdown">Redirecting in 3 seconds...</div>
+                <button class="submit-btn" onclick="location.reload()">Request Another Quote</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 Generali Global. All rights reserved.</p>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="booking.js"></script>
+</body>
+
+</html>
