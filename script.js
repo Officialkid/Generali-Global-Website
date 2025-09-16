@@ -58,59 +58,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const prevBtn = document.getElementById('carousel-prev');
     const nextBtn = document.getElementById('carousel-next');
     let currentPosition = 0;
-    let autoScrollInterval;
+    const isMobile = window.innerWidth <= 992;
 
-    function startAutoScroll() {
-        autoScrollInterval = setInterval(() => {
-            const cardWidth = document.querySelector('.service-card').offsetWidth + 30;
-            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-
-            if (currentPosition >= maxScroll) {
-                currentPosition = 0;
-            } else {
-                currentPosition += cardWidth;
-            }
-
-            carousel.scrollTo({
-                left: currentPosition,
-                behavior: 'smooth'
-            });
-        }, 3000);
-    }
-
-    function stopAutoScroll() {
-        clearInterval(autoScrollInterval);
-    }
-
-    if (carousel && prevBtn && nextBtn) {
-        // Start auto-scroll
-        startAutoScroll();
-
-        // Pause auto-scroll on hover
-        carousel.addEventListener('mouseenter', stopAutoScroll);
-        carousel.addEventListener('mouseleave', startAutoScroll);
+    if (carousel && prevBtn && nextBtn && !isMobile) {
+        const cardWidth = document.querySelector('.service-card').offsetWidth + 30;
+        const maxScroll = carousel.scrollWidth - carousel.clientWidth;
 
         nextBtn.addEventListener('click', () => {
-            stopAutoScroll();
-            const cardWidth = document.querySelector('.service-card').offsetWidth + 30;
-            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
             currentPosition = Math.min(currentPosition + cardWidth, maxScroll);
             carousel.scrollTo({
                 left: currentPosition,
                 behavior: 'smooth'
             });
-            setTimeout(startAutoScroll, 5000);
         });
 
         prevBtn.addEventListener('click', () => {
-            stopAutoScroll();
-            const cardWidth = document.querySelector('.service-card').offsetWidth + 30;
             currentPosition = Math.max(currentPosition - cardWidth, 0);
             carousel.scrollTo({
                 left: currentPosition,
                 behavior: 'smooth'
             });
-            setTimeout(startAutoScroll, 5000);
         });
     }
 
@@ -191,3 +158,4 @@ if (whatsappBtn) {
         this.classList.remove('pulse');
     });
 }
+        

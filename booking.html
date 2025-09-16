@@ -5,22 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book With Generali</title>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <!-- Your CSS files -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="booking.css">
+   <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="booking.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+       
+    </style>
 </head>
 
 <body>
-
-    
-
     <!-- Debug Info Panel -->
     <div class="debug-info" id="debugInfo"></div>
-    
+
     <!-- Navigation -->
     <nav class="navbar">
         <a href="index.html" class="logo">
@@ -32,13 +28,13 @@
             <a href="index.html#services"><i class="fas fa-cogs"></i> Services</a>
             <a href="index.html#events"><i class="fas fa-calendar-alt"></i> Events</a>
             <a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a>
-            <a href="/booking.html" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
+            <a href="#" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
         </div>
         <button class="hamburger" id="hamburger">
             <i class="fas fa-bars"></i>
         </button>
     </nav>
-    
+
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobile-menu">
         <div class="mobile-menu-header">
@@ -55,10 +51,10 @@
             <a href="index.html#services"><i class="fas fa-cogs"></i> Services</a>
             <a href="index.html#events"><i class="fas fa-calendar-alt"></i> Events</a>
             <a href="index.html#contact"><i class="fas fa-envelope"></i> Contact</a>
-            <a href="booking.html" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
+            <a href="#" class="nav-cta"><i class="fas fa-file-alt"></i> Request Quote</a>
         </div>
     </div>
-    
+
     <!-- Quote Hero Section -->
     <section class="quote-hero">
         <div class="quote-hero-content">
@@ -66,7 +62,7 @@
             <p>Get a customized quote for your event with Generali Global</p>
         </div>
     </section>
-    
+
     <!-- Quote Form -->
     <section class="quote-form-container">
         <div class="quote-form" id="quote-form">
@@ -74,7 +70,7 @@
                 <h2>Request for Quotation</h2>
                 <p>Provide some details about your event and we'll send you a customized quote via WhatsApp</p>
             </div>
-    
+
             <form id="quoteForm">
                 <div class="form-row">
                     <div class="form-group">
@@ -88,7 +84,7 @@
                         <div class="validation-error" id="quoteLastNameError"></div>
                     </div>
                 </div>
-    
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="quoteEmail">Email *</label>
@@ -102,7 +98,7 @@
                         <div class="validation-error" id="quotePhoneError"></div>
                     </div>
                 </div>
-    
+
                 <div class="form-group">
                     <label for="quoteEventType">Event Type *</label>
                     <select id="quoteEventType" name="quoteEventType" required>
@@ -116,7 +112,7 @@
                     </select>
                     <div class="validation-error" id="quoteEventTypeError"></div>
                 </div>
-    
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="quoteEventDuration">Event Duration *</label>
@@ -140,38 +136,39 @@
                         </select>
                     </div>
                 </div>
-    
+
                 <div class="form-group">
                     <label for="eventDetails">Additional Details (Optional)</label>
                     <textarea id="eventDetails" name="eventDetails"
                         placeholder="Any other information about your event that might be helpful for our quotation"></textarea>
                     <div class="optional-note">This field is optional</div>
                 </div>
-    
+
                 <button type="submit" class="submit-btn" id="quoteSubmitBtn">Request Quote via WhatsApp</button>
             </form>
         </div>
     </section>
-    
+
     <!-- Success Message -->
     <div class="quote-form-container" id="success-message-container" style="display: none;">
         <div class="quote-form">
             <div class="success-message">
                 <i class="fas fa-check-circle"></i>
                 <h3>Thank You!</h3>
-                <p id="success-message-text">Your quote request has been prepared. You will be redirected to WhatsApp in a
+                <p id="success-message-text">Your quote request has been prepared. You will be redirected to WhatsApp in
+                    a
                     moment to send your request and receive your customized quote.</p>
                 <div class="countdown" id="countdown">Redirecting in 3 seconds...</div>
                 <button class="submit-btn" onclick="location.reload()">Request Another Quote</button>
             </div>
         </div>
     </div>
+
     <footer>
         <p>&copy; 2025 Generali Global. All rights reserved.</p>
     </footer>
-    
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="booking.js"></script>
+
+   <script src="booking.js"></script>
 </body>
 
 </html>

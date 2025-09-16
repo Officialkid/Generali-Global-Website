@@ -1,17 +1,33 @@
-// Debug function to show status messages
-function showDebugInfo(message) {
+// Enhanced debug function with better visibility
+function showDebugInfo(message, type = 'info') {
     const debugInfo = document.getElementById('debugInfo');
-    debugInfo.textContent = message;
-    debugInfo.style.display = 'block';
-    console.log('DEBUG:', message);
+    const timestamp = new Date().toLocaleTimeString();
 
-    // Auto-hide after 5 seconds
+    // Color coding for different message types
+    const colors = {
+        info: '#4CAF50',
+        warning: '#FF9800',
+        error: '#F44336',
+        success: '#8BC34A'
+    };
+
+    debugInfo.innerHTML = `
+                <div style="border-left: 3px solid ${colors[type]}; padding-left: 10px;">
+                    <strong>[${timestamp}] ${type.toUpperCase()}:</strong><br>
+                    ${message}
+                </div>
+            `;
+    debugInfo.className = 'debug-info show';
+
+    console.log(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+
+    // Auto-hide after 8 seconds for better debugging
     setTimeout(() => {
-        debugInfo.style.display = 'none';
-    }, 5000);
+        debugInfo.classList.remove('show');
+    }, 8000);
 }
 
-// Check if all required elements exist
+// Enhanced element checking with detailed reporting
 function checkElements() {
     const requiredElements = [
         'quoteForm', 'quoteFirstName', 'quoteLastName', 'quoteEmail',
@@ -20,189 +36,98 @@ function checkElements() {
     ];
 
     let allElementsExist = true;
+    let missingElements = [];
 
     requiredElements.forEach(id => {
         const element = document.getElementById(id);
         if (!element) {
             console.error(`Element with ID ${id} not found`);
-            showDebugInfo(`Error: Element ${id} not found`);
+            missingElements.push(id);
             allElementsExist = false;
+        } else {
+            console.log(`✓ Element ${id} found`);
         }
     });
+
+    if (!allElementsExist) {
+        showDebugInfo(`Missing elements: ${missingElements.join(', ')}`, 'error');
+    } else {
+        showDebugInfo('All required elements found', 'success');
+    }
 
     return allElementsExist;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('Initializing quote system...');
-    showDebugInfo('System initializing...');
-
-    // Check if all required elements exist
-    if (!checkElements()) {
-        console.error('Required elements missing');
-        showDebugInfo('Error: Some elements are missing from the page');
-        return;
-    }
-
-    // Initialize all components
-    try {
-        setupFormHandlers();
-        setupMobileMenu();
-        console.log('System ready');
-        showDebugInfo('System ready - Form can be submitted');
-    } catch (error) {
-        console.error('Initialization failed:', error);
-        showDebugInfo('Initialization failed: ' + error.message);
-        alert('System initialization failed. Please refresh the page.');
-    }
-});
-
-/* ========== FORM HANDLING ========== */
-function setupFormHandlers() {
-    // Form submissions
-    const quoteForm = document.getElementById('quoteForm');
-
-    if (quoteForm) {
-        quoteForm.addEventListener('submit', handleQuoteSubmit);
-        console.log('Quote form handler attached');
-        showDebugInfo('Form handler attached');
-    } else {
-        console.warn('Quote form not found');
-        showDebugInfo('Error: Form not found');
-    }
-
-    // Real-time validation
-    setupRealTimeValidation();
-}
-
-function setupRealTimeValidation() {
-    // Email validation
-    const emailFields = document.querySelectorAll('input[type="email"]');
-    emailFields.forEach(field => {
-        field.addEventListener('blur', function () {
-            validateEmail(this);
-        });
-        field.addEventListener('input', function () {
-            // Clear error on input
-            clearFieldError(this.id);
-        });
-    });
-
-    // Phone validation
-    const phoneFields = document.querySelectorAll('input[type="tel"]');
-    phoneFields.forEach(field => {
-        field.addEventListener('blur', function () {
-            validatePhone(this);
-        });
-        field.addEventListener('input', function () {
-            clearFieldError(this.id);
-        });
-    });
-
-    // Required field validation
-    const requiredFields = document.querySelectorAll('[required]');
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function () {
-            validateRequiredField(this);
-        });
-        field.addEventListener('input', function () {
-            clearFieldError(this.id);
-        });
-    });
-}
-
-/* ========== FORM VALIDATION ========== */
+// Enhanced form validation with detailed feedback
 function validateForm(form) {
     if (!form) {
-        console.error('Form not provided for validation');
-        showDebugInfo('Error: Form validation failed');
+        showDebugInfo('Form element not provided for validation', 'error');
         return false;
     }
 
     let isValid = true;
+    let errors = [];
 
-    console.log('Validating form');
-    showDebugInfo('Validating form...');
+    showDebugInfo('Starting form validation...', 'info');
 
-    // Reset all errors first
+    // Clear all previous errors
     clearAllErrors(form);
 
-    // Validate each required field
+    // Validate required fields
     const requiredFields = form.querySelectorAll('[required]');
+    console.log(`Found ${requiredFields.length} required fields`);
+
     requiredFields.forEach(field => {
-        if (!validateRequiredField(field)) {
+        const fieldName = field.name || field.id;
+        if (!field.value.trim()) {
+            showFieldError(field, 'This field is required');
+            errors.push(`${fieldName} is empty`);
             isValid = false;
+        } else {
+            console.log(`✓ ${fieldName}: "${field.value.trim()}"`);
         }
     });
 
     // Email validation
     const emailField = form.querySelector('input[type="email"]');
     if (emailField && emailField.value.trim()) {
-        if (!validateEmail(emailField)) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(emailField.value.trim())) {
+            showFieldError(emailField, 'Please enter a valid email address');
+            errors.push('Invalid email format');
             isValid = false;
+        } else {
+            console.log(`✓ Email valid: ${emailField.value.trim()}`);
         }
     }
 
-    // Phone validation
+    // Phone validation - More flexible for international numbers
     const phoneField = form.querySelector('input[type="tel"]');
     if (phoneField && phoneField.value.trim()) {
-        if (!validatePhone(phoneField)) {
+        // Remove spaces, dashes, and parentheses for validation
+        const cleanPhone = phoneField.value.trim().replace(/[\s\-\(\)]/g, '');
+        // Allow various formats: local, country code with +, country code without +
+        const phonePattern = /^(\+?254|0)?[1-9]\d{7,9}$/;
+
+        if (!phonePattern.test(cleanPhone)) {
+            showFieldError(phoneField, 'Please enter a valid phone number');
+            errors.push(`Invalid phone: ${phoneField.value.trim()}`);
             isValid = false;
+        } else {
+            console.log(`✓ Phone valid: ${phoneField.value.trim()}`);
         }
     }
 
-    console.log('Form validation result:', isValid);
-    showDebugInfo('Form validation: ' + (isValid ? 'PASSED' : 'FAILED'));
+    if (isValid) {
+        showDebugInfo('Form validation PASSED ✓', 'success');
+    } else {
+        showDebugInfo(`Form validation FAILED: ${errors.join(', ')}`, 'error');
+    }
+
     return isValid;
 }
 
-function validateEmail(field) {
-    if (!field) return false;
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const errorElement = document.getElementById(field.id + 'Error');
-
-    if (!field.value.trim() || !emailPattern.test(field.value.trim())) {
-        showFieldError(field, 'Please enter a valid email address');
-        return false;
-    } else {
-        clearFieldError(field.id);
-        return true;
-    }
-}
-
-function validatePhone(field) {
-    if (!field) return false;
-
-    // Kenyan phone number validation (10-12 digits, with or without country code)
-    const phonePattern = /^(\+?254|0)?[17]\d{8}$/;
-    const errorElement = document.getElementById(field.id + 'Error');
-
-    if (!field.value.trim()) {
-        showFieldError(field, 'Phone number is required');
-        return false;
-    } else if (!phonePattern.test(field.value.trim().replace(/\s/g, ''))) {
-        showFieldError(field, 'Please enter a valid Kenyan phone number (10-12 digits)');
-        return false;
-    } else {
-        clearFieldError(field.id);
-        return true;
-    }
-}
-
-function validateRequiredField(field) {
-    if (!field) return false;
-
-    if (!field.value.trim()) {
-        showFieldError(field, 'This field is required');
-        return false;
-    } else {
-        clearFieldError(field.id);
-        return true;
-    }
-}
-
-/* ========== ERROR HANDLING UTILITIES ========== */
+// Enhanced error display functions
 function showFieldError(field, message) {
     if (!field) return;
 
@@ -217,6 +142,8 @@ function showFieldError(field, message) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
     }
+
+    console.log(`Error on field ${field.id}: ${message}`);
 }
 
 function clearFieldError(fieldId) {
@@ -247,79 +174,67 @@ function clearAllErrors(form) {
     });
 }
 
-/* ========== SUBMISSION HANDLERS ========== */
-function handleQuoteSubmit(e) {
-    e.preventDefault();
-    console.log('Quote form submitted');
-    showDebugInfo('Form submission started');
+// Enhanced WhatsApp message generation
+function generateQuoteMessage(data) {
+    const message = `🎉 *New Quote Request - Generali Global*\n\n` +
+        `👤 *Client Details:*\n` +
+        `• Name: ${data.quoteFirstName} ${data.quoteLastName}\n` +
+        `• Email: ${data.quoteEmail}\n` +
+        `• Phone: ${data.quotePhone}\n\n` +
+        `🎊 *Event Information:*\n` +
+        `• Type: ${data.quoteEventType}\n` +
+        `• Duration: ${data.quoteEventDuration || 'To be discussed'}\n` +
+        `• Sessions: ${data.quoteNumberOfSessions || '1'}\n\n` +
+        `📝 *Additional Details:*\n` +
+        `${data.eventDetails || 'No additional details provided'}\n\n` +
+        `_This message was sent via Generali Global booking system_\n` +
+        `Please provide a customized quote for this event. Thank you! 🙏`;
 
-    const form = e.target;
+    console.log('Generated WhatsApp message:');
+    console.log(message);
+    return message;
+}
 
+// Enhanced WhatsApp redirect with better error handling
+function redirectToWhatsApp(formType, data) {
     try {
-        // Show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+        showDebugInfo('Preparing WhatsApp message...', 'info');
+
+        const message = generateQuoteMessage(data);
+        const whatsappNumber = '254702190131'; // Your WhatsApp number
+
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+        console.log('WhatsApp URL length:', whatsappUrl.length);
+        console.log('WhatsApp URL:', whatsappUrl);
+
+        // Check URL length (WhatsApp has limits)
+        if (whatsappUrl.length > 2000) {
+            showDebugInfo('Message too long, shortening...', 'warning');
+            const shortMessage = `🎉 New Quote Request\n\nName: ${data.quoteFirstName} ${data.quoteLastName}\nEmail: ${data.quoteEmail}\nPhone: ${data.quotePhone}\nEvent: ${data.quoteEventType}\nDuration: ${data.quoteEventDuration}\n\nPlease provide a quote. Thanks!`;
+            const shortUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(shortMessage)}`;
+            console.log('Shortened URL:', shortUrl);
+
+            openWhatsAppWithCountdown(shortUrl, data);
+        } else {
+            openWhatsAppWithCountdown(whatsappUrl, data);
         }
-
-        // Validate form
-        if (!validateForm(form)) {
-            console.log('Form validation failed');
-            showDebugInfo('Form validation failed - please check fields');
-            alert('Please fill all required fields correctly');
-
-            // Reset button
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-            return;
-        }
-
-        // Collect form data
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        console.log('Quote data collected:', data);
-        showDebugInfo('Form data collected successfully');
-
-        // Reset button
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-        }
-
-        // Redirect to WhatsApp automatically
-        redirectToWhatsApp('quote', data);
 
     } catch (error) {
-        console.error('Quote submission error:', error);
-        showDebugInfo('Submission error: ' + error.message);
-        alert('An error occurred. Please try again.');
-
-        // Reset button
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Request Quote via WhatsApp';
-        }
+        console.error('WhatsApp redirect error:', error);
+        showDebugInfo(`WhatsApp redirect failed: ${error.message}`, 'error');
+        alert('Failed to prepare WhatsApp message. Please try again or contact us directly.');
     }
 }
 
-/* ========== WHATSAPP INTEGRATION ========== */
-function redirectToWhatsApp(formType, data) {
+// Separate function to handle the countdown and opening
+function openWhatsAppWithCountdown(whatsappUrl, data) {
     try {
-        const message = generateQuoteMessage(data);
-
-        console.log('Generated WhatsApp message for', formType);
-        showDebugInfo('Generated WhatsApp message');
-
-        const whatsappUrl = `https://wa.me/254702190131?text=${encodeURIComponent(message)}`;
-
-        // Show success message first
-        showSuccessMessage(formType, data);
+        // Show success message
+        showSuccessMessage(data);
+        showDebugInfo('Success message displayed, starting countdown...', 'success');
 
         // Countdown before redirecting
         let countdown = 3;
@@ -331,58 +246,78 @@ function redirectToWhatsApp(formType, data) {
                 countdownElement.textContent = `Redirecting in ${countdown} second${countdown !== 1 ? 's' : ''}...`;
             }
 
+            console.log(`Countdown: ${countdown}`);
+
             if (countdown <= 0) {
                 clearInterval(countdownInterval);
-                // Open WhatsApp after countdown
-                window.open(whatsappUrl, '_blank');
-                showDebugInfo('Opened WhatsApp with pre-filled message');
+
+                showDebugInfo('Opening WhatsApp...', 'info');
+                console.log('Attempting to open WhatsApp URL:', whatsappUrl);
+
+                // Try multiple methods to ensure WhatsApp opens
+                try {
+                    // Method 1: window.open (preferred)
+                    const whatsappWindow = window.open(whatsappUrl, '_blank');
+
+                    if (!whatsappWindow) {
+                        showDebugInfo('Pop-up blocked, trying alternative...', 'warning');
+                        // Method 2: location.href as fallback
+                        window.location.href = whatsappUrl;
+                    } else {
+                        showDebugInfo('WhatsApp opened successfully!', 'success');
+                    }
+                } catch (openError) {
+                    console.error('Failed to open WhatsApp:', openError);
+                    showDebugInfo(`Failed to open WhatsApp: ${openError.message}`, 'error');
+
+                    // Method 3: Show manual link as last resort
+                    if (countdownElement) {
+                        countdownElement.innerHTML = `
+                                    <p>Unable to auto-open WhatsApp.</p>
+                                    <a href="${whatsappUrl}" target="_blank" style="color: var(--color-gold); text-decoration: underline;">
+                                        Click here to open WhatsApp manually
+                                    </a>
+                                `;
+                    }
+                }
             }
         }, 1000);
 
     } catch (error) {
-        console.error('WhatsApp redirect failed:', error);
-        showDebugInfo('WhatsApp redirect failed: ' + error.message);
-        alert('Failed to generate WhatsApp message. Please try again.');
+        console.error('Countdown error:', error);
+        showDebugInfo(`Countdown error: ${error.message}`, 'error');
     }
 }
 
-function generateQuoteMessage(data) {
-    return `💡 New Quote Request:\n\n` +
-        `👤 Name: ${data.quoteFirstName} ${data.quoteLastName}\n` +
-        `✉️ Email: ${data.quoteEmail}\n` +
-        `📞 Phone: ${data.quotePhone}\n\n` +
-        `🎉 Event Type: ${data.quoteEventType}\n` +
-        `⏳ Duration: ${data.quoteEventDuration || 'To be discussed'}\n` +
-        `🔄 Sessions: ${data.quoteNumberOfSessions || '1'}\n\n` +
-        `📝 Additional Details:\n${data.eventDetails || 'No additional details provided'}\n\n` +
-        `_This message was sent via Generali Global booking system_`;
-}
-
-/* ========== UI COMPONENTS ========== */
-function showSuccessMessage(formType, data) {
+// Enhanced success message display
+function showSuccessMessage(data) {
     try {
         const container = document.getElementById('success-message-container');
         const messageText = document.getElementById('success-message-text');
         const quoteForm = document.getElementById('quote-form');
 
         if (!container || !messageText || !quoteForm) {
-            console.error('Success message elements not found');
-            showDebugInfo('Error: Success message elements not found');
+            showDebugInfo('Success message elements not found', 'error');
+            console.error('Missing success message elements:', {
+                container: !!container,
+                messageText: !!messageText,
+                quoteForm: !!quoteForm
+            });
             return;
         }
 
         // Hide the form
         quoteForm.style.display = 'none';
 
-        // Generate success message
+        // Update success message
         messageText.innerHTML = `
-                    <p>Thank you ${data.quoteFirstName}, your quote request has been prepared.</p>
+                    <p>Thank you <strong>${data.quoteFirstName}</strong>, your quote request has been prepared!</p>
                     <p>You will be redirected to WhatsApp in a moment to send your request and receive your customized quote.</p>
                 `;
 
         // Show success container
         container.style.display = 'block';
-        showDebugInfo('Success message displayed');
+        showDebugInfo('Success message displayed', 'success');
 
         // Scroll to success message
         setTimeout(() => {
@@ -391,11 +326,72 @@ function showSuccessMessage(formType, data) {
 
     } catch (error) {
         console.error('Error showing success message:', error);
-        showDebugInfo('Error showing success: ' + error.message);
+        showDebugInfo(`Error showing success: ${error.message}`, 'error');
     }
 }
 
-/* ========== MOBILE MENU ========== */
+// Enhanced form submission handler
+function handleQuoteSubmit(e) {
+    e.preventDefault();
+
+    showDebugInfo('Form submission started', 'info');
+    console.log('Quote form submitted');
+
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.textContent : '';
+
+    try {
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+            showDebugInfo('Button disabled, showing loading state', 'info');
+        }
+
+        // Validate form
+        if (!validateForm(form)) {
+            showDebugInfo('Form validation failed', 'error');
+            alert('Please fill all required fields correctly');
+            return;
+        }
+
+        // Collect form data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        console.log('Collected form data:', data);
+        showDebugInfo('Form data collected successfully', 'success');
+
+        // Verify all required data is present
+        const requiredFields = ['quoteFirstName', 'quoteLastName', 'quoteEmail', 'quotePhone', 'quoteEventType', 'quoteEventDuration'];
+        const missingData = requiredFields.filter(field => !data[field]);
+
+        if (missingData.length > 0) {
+            showDebugInfo(`Missing data: ${missingData.join(', ')}`, 'error');
+            alert('Some required data is missing. Please check the form.');
+            return;
+        }
+
+        // Process WhatsApp redirect
+        redirectToWhatsApp('quote', data);
+
+    } catch (error) {
+        console.error('Quote submission error:', error);
+        showDebugInfo(`Submission error: ${error.message}`, 'error');
+        alert('An error occurred while processing your request. Please try again.');
+    } finally {
+        // Reset button state
+        if (submitBtn) {
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }, 2000); // Keep disabled for 2 seconds to prevent double submission
+        }
+    }
+}
+
+// Enhanced mobile menu setup
 function setupMobileMenu() {
     const hamburger = document.getElementById('hamburger');
     const closeBtn = document.getElementById('close-btn');
@@ -404,8 +400,7 @@ function setupMobileMenu() {
     if (hamburger && mobileMenu) {
         hamburger.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Opening mobile menu');
-            showDebugInfo('Opening mobile menu');
+            showDebugInfo('Opening mobile menu', 'info');
             mobileMenu.classList.add('active');
             document.body.style.overflow = 'hidden';
         });
@@ -414,8 +409,7 @@ function setupMobileMenu() {
     if (closeBtn && mobileMenu) {
         closeBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Closing mobile menu');
-            showDebugInfo('Closing mobile menu');
+            showDebugInfo('Closing mobile menu', 'info');
             mobileMenu.classList.remove('active');
             document.body.style.overflow = '';
         });
@@ -431,3 +425,131 @@ function setupMobileMenu() {
         });
     }
 }
+
+// Enhanced real-time validation setup
+function setupRealTimeValidation() {
+    // Email validation
+    const emailFields = document.querySelectorAll('input[type="email"]');
+    emailFields.forEach(field => {
+        field.addEventListener('blur', function () {
+            if (this.value.trim()) {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(this.value.trim())) {
+                    showFieldError(this, 'Please enter a valid email address');
+                } else {
+                    clearFieldError(this.id);
+                }
+            }
+        });
+
+        field.addEventListener('input', function () {
+            clearFieldError(this.id);
+        });
+    });
+
+    // Phone validation
+    const phoneFields = document.querySelectorAll('input[type="tel"]');
+    phoneFields.forEach(field => {
+        field.addEventListener('blur', function () {
+            if (this.value.trim()) {
+                const cleanPhone = this.value.trim().replace(/[\s\-\(\)]/g, '');
+                const phonePattern = /^(\+?254|0)?[1-9]\d{7,9}$/;
+
+                if (!phonePattern.test(cleanPhone)) {
+                    showFieldError(this, 'Please enter a valid phone number');
+                } else {
+                    clearFieldError(this.id);
+                }
+            }
+        });
+
+        field.addEventListener('input', function () {
+            clearFieldError(this.id);
+        });
+    });
+
+    // Required field validation
+    const requiredFields = document.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function () {
+            if (!this.value.trim()) {
+                showFieldError(this, 'This field is required');
+            } else {
+                clearFieldError(this.id);
+            }
+        });
+
+        field.addEventListener('input', function () {
+            if (this.value.trim()) {
+                clearFieldError(this.id);
+            }
+        });
+    });
+
+    showDebugInfo('Real-time validation setup complete', 'success');
+}
+
+// Enhanced initialization
+function initializeSystem() {
+    try {
+        showDebugInfo('System initializing...', 'info');
+        console.log('Initializing booking system...');
+
+        // Check if all required elements exist
+        if (!checkElements()) {
+            throw new Error('Required elements missing from page');
+        }
+
+        // Setup form handlers
+        const quoteForm = document.getElementById('quoteForm');
+        if (quoteForm) {
+            quoteForm.addEventListener('submit', handleQuoteSubmit);
+            showDebugInfo('Form handler attached', 'success');
+        } else {
+            throw new Error('Quote form not found');
+        }
+
+        // Setup real-time validation
+        setupRealTimeValidation();
+
+        // Setup mobile menu
+        setupMobileMenu();
+
+        showDebugInfo('System ready - Form can be submitted', 'success');
+        console.log('System initialization complete');
+
+    } catch (error) {
+        console.error('Initialization failed:', error);
+        showDebugInfo(`Initialization failed: ${error.message}`, 'error');
+        alert('System initialization failed. Please refresh the page and try again.');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+    // Small delay to ensure all elements are fully loaded
+    setTimeout(initializeSystem, 100);
+});
+
+// Additional debugging: Log any JavaScript errors
+window.addEventListener('error', function (e) {
+    console.error('JavaScript Error:', e.error);
+    showDebugInfo(`JavaScript Error: ${e.message} at line ${e.lineno}`, 'error');
+});
+
+// Test function you can call from console for debugging
+window.testWhatsApp = function (testData = null) {
+    const data = testData || {
+        quoteFirstName: 'John',
+        quoteLastName: 'Doe',
+        quoteEmail: 'john@example.com',
+        quotePhone: '+254712345678',
+        quoteEventType: 'Corporate Events',
+        quoteEventDuration: '4 hours',
+        quoteNumberOfSessions: '1',
+        eventDetails: 'Test event'
+    };
+
+    console.log('Testing WhatsApp with data:', data);
+    redirectToWhatsApp('quote', data);
+};
